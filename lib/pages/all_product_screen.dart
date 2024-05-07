@@ -8,6 +8,7 @@ import 'package:vendor/pages/unpublished_products.dart';
 import 'package:vendor/widgets/custom_drawer_nav.dart';
 
 import '../controllers/user_controller.dart';
+import 'switch_product.dart';
 
 class AllProductScreen extends StatefulWidget {
   const AllProductScreen({super.key});
@@ -100,6 +101,42 @@ class _AllProductScreenState extends State<AllProductScreen> {
                   toggleMenu();
                 },
               ),
+              actions: [
+                if (userController.user.value?.selectedShopType?.isNotEmpty ??
+                    false)
+                  Padding(
+                    padding: EdgeInsets.only(right: 10.w),
+                    child: InkWell(
+                      onTap: () {
+                        Get.to(() => SwitchPage(
+                              shopType:
+                                  userController.user.value!.selectedShopType!,
+                            ));
+                      },
+                      child: SizedBox(
+                        width: 80.w,
+                        height: 35.h,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: const Color(0xfffe724c),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Add Product',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                                height: 1.2230000496.h,
+                                color: const Color(0xffffffff),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
               flexibleSpace: Stack(
                 children: [
                   if (userController.user.value != null &&

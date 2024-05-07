@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,11 +16,12 @@ class ProductUploadController extends GetxController {
 
   RxBool isloading = false.obs;
   List<String> downloadUrls = [];
-
+  RxInt count = 0.obs;
   Future<void> uploadData(
       {required String businessName,
       required String productName,
       required double productPrice,
+      required String productId,
       required List<String> colorAvailable,
       required String productDesc,
       required bool isSelectedFr,
@@ -44,6 +46,7 @@ class ProductUploadController extends GetxController {
           'productPrice': productPrice,
           'colorAvailable': colorAvailable,
           'productDesc': productDesc,
+          'productId': productId,
           'Fragible': isSelectedFr,
           'Hazardousness': isSelected,
           'selectedCategory': selectedCategory,
@@ -77,7 +80,7 @@ class ProductUploadController extends GetxController {
         XFile imageFile = imageFiles[i];
         String imageName = path.basename(imageFile.path);
 
-        // Get the file path from the XFile object
+        
         File file = File(imageFile.path);
 
         firebase_storage.Reference ref = firebase_storage
@@ -93,6 +96,21 @@ class ProductUploadController extends GetxController {
       }
     } catch (e) {
       throw Exception('Error uploading images: $e');
+    }
+  }
+
+  Future<void> getCount(String selectedCat) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collectionGroup('vendor_products')
+          .where('selectedCategory', isEqualTo: selectedCat)
+          .get();
+
+      count.value = querySnapshot.size;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error getting documents: $e");
+      }
     }
   }
 }

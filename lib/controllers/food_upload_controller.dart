@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,6 +15,7 @@ class FoodImagePickerController extends GetxController {
   RxString foodDownloadURL = ''.obs;
 
   RxString imagePath = "".obs;
+  RxInt count = 0.obs;
 
   Future<void> pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
@@ -50,5 +52,20 @@ class FoodImagePickerController extends GetxController {
         ),
       );
     });
+  }
+
+  Future<void> getCount(String selectedCat) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collectionGroup('vendor_foods')
+          .where('foodCat', isEqualTo: selectedCat)
+          .get();
+
+      count.value = querySnapshot.size;
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error getting documents: $e");
+      }
+    }
   }
 }

@@ -58,7 +58,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     'Food and Groceries',
     'Others',
   ];
-
+  String productId = "";
   bool isOpened = false;
 
   final GlobalKey<SideMenuState> _sideMenuKey = GlobalKey<SideMenuState>();
@@ -95,10 +95,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
     price.clear();
     about.clear();
     selectedCategory = 'None';
-    _productImagePickerController.clearPickedImages();
+
     _currentSliderValue = 0;
     _currenthazardValue = 0;
     controller.selectedColors.clear();
+
     colorStrings.clear();
     setState(() {
       isSelected = [false, false];
@@ -110,6 +111,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(_productImagePickerController.pickedImages.length);
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
@@ -190,15 +192,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       Container(
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: NetworkImage(userController.user.value!
-                                .downloadURL!), // Replace with your background image asset
+                            image: NetworkImage(
+                                userController.user.value!.downloadURL!),
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
                       Container(
-                        color: Colors.white
-                            .withOpacity(0.7), // Adjust the opacity as needed
+                        color: Colors.white.withOpacity(0.7),
                       ),
                     ],
                   ),
@@ -476,10 +477,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             title: const Text('Pick a color!'),
                                             content: SingleChildScrollView(
                                               child: BlockPicker(
-                                                pickerColor: Colors
-                                                    .white, // Default color
+                                                pickerColor: Colors.white,
                                                 onColorChanged: (Color color) {
-                                                  // Safe call to addColor
                                                   if (!controller.selectedColors
                                                       .contains(color)) {
                                                     controller.addColor(color);
@@ -489,7 +488,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                       .map((color) =>
                                                           colorToString(color))
                                                       .toList();
-                                                  Get.back(); // Close the dialog safely
+                                                  Get.back();
                                                 },
                                               ),
                                             ),
@@ -536,6 +535,23 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   onChanged: (newValue) {
                                     setState(() {
                                       selectedCategory = newValue;
+                                      _productUploadController
+                                          .getCount(selectedCategory!)
+                                          .then((value) {
+                                        int number = _productUploadController
+                                                .count.value +
+                                            1;
+
+                                        String seller = getFirstThreeUpperCase(
+                                            userController
+                                                .user.value!.businessName!);
+                                        String result = getFirstThreeUpperCase(
+                                            selectedCategory!);
+                                        productId =
+                                            "$seller-$result-00${number.toStringAsFixed(0)}";
+
+                                        print(number);
+                                      });
                                     });
                                   },
                                   items: categories.map((category) {
@@ -685,7 +701,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     isSelected: isSelected,
                                     onPressed: (int index) {
                                       setState(() {
-                                        // Update the selection when a button is pressed
                                         for (int i = 0;
                                             i < isSelected.length;
                                             i++) {
@@ -789,9 +804,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                       images:
                                                           _productImagePickerController
                                                               .pickedImages,
-                                                      context: context)
+                                                      context: context,
+                                                      productId: productId)
                                                   .then((value) {
                                                 clearAll();
+                                                Get.back();
                                               });
                                             }
                                           } else {
@@ -976,5 +993,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String colorToString(Color color) {
     // Using the hex value of the color and converting it to a string
     return color.value.toRadixString(16).toUpperCase();
+  }
+
+  String getFirstThreeUpperCase(String? input) {
+    if (input!.length < 3) {
+      return input.toUpperCase();
+    } else {
+      return input.substring(0, 3).toUpperCase();
+    }
   }
 }

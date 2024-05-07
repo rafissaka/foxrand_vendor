@@ -38,7 +38,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
   var addOnName = TextEditingController();
   var addOnPrice = TextEditingController();
   String image = "";
-  String selectedFoodCategory = ''; // Initial value
+  String selectedFoodCategory = ''; 
   List<String> foodCategories = ['Local', 'Rice', 'Asian'];
   List<Map<String, dynamic>> addOns = [];
 
@@ -71,7 +71,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
         "name": addOnName.text,
         "price": addOnPrice.text,
       });
-      // Clear the text fields after adding an add-on
+  
       addOnName.clear();
       addOnPrice.clear();
     });
@@ -153,7 +153,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
           addOns = List<Map<String, dynamic>>.from(data["addOns"] ?? []);
           image = data["foodUrl"] ?? "";
           if (!foodCategories.contains(selectedFoodCategory)) {
-            // Add the fetched food category if it's not in the list
+       
             foodCategories.add(selectedFoodCategory);
           }
         });
@@ -171,7 +171,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
     super.initState();
   }
 
-  // Function to build the dropdown menu items
+
   List<DropdownMenuItem<String>> buildDropdownMenuItems(
       List<String> categories) {
     List<DropdownMenuItem<String>> items = [];
@@ -192,7 +192,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
     });
 
     try {
-      // Prepare data to update
+   
       Map<String, dynamic> updatedData = {
         "foodName": foodName.text,
         "foodPrice": foodPrice.text,
@@ -201,7 +201,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
         "addOns": addOns,
       };
 
-      // Update data in Firebase
+    
       await FirebaseFirestore.instance
           .collection('foods')
           .doc(auth.currentUser!.uid)
@@ -209,7 +209,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
           .doc(widget.docId)
           .update(updatedData);
 
-      // Show success message
+     
       Fluttertoast.showToast(
         msg: "Data updated successfully",
         toastLength: Toast.LENGTH_LONG,
@@ -220,7 +220,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
         fontSize: 16.0,
       );
     } catch (e) {
-      // Show error message
+
       Fluttertoast.showToast(
         msg: "Failed to update data: $e",
         toastLength: Toast.LENGTH_LONG,
@@ -331,14 +331,14 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: NetworkImage(userController.user.value!
-                          .downloadURL!), // Replace with your background image asset
+                          .downloadURL!), 
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
                 Container(
                   color: Colors.white
-                      .withOpacity(0.7), // Adjust the opacity as needed
+                      .withOpacity(0.7), 
                 ),
               ],
             ),
@@ -373,7 +373,8 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                           height: screenHeight * 0.26,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return const Text('Error loading image');
+                            return const Center(
+                                child: CircularProgressIndicator.adaptive());
                           },
                         ),
                       ),
@@ -423,16 +424,16 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        // List of add-ons
+                      
                         for (int index = 0; index < addOns.length; index++)
                           Row(
                             children: [
-                              // TextFields for add-on name and price
+                        
                               Expanded(
                                 child: TextField(
                                   controller: TextEditingController(
                                     text: addOns[index]['name']
-                                        .toString(), // Convert to String
+                                        .toString(), 
                                   ),
                                   onChanged: (value) {
                                     addOns[index]['name'] = value;
@@ -447,7 +448,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                                 child: TextField(
                                   controller: TextEditingController(
                                     text: addOns[index]['price']
-                                        .toString(), // Convert to String
+                                        .toString(), 
                                   ),
                                   onChanged: (value) {
                                     addOns[index]['price'] = value;
@@ -458,7 +459,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                                 ),
                               ),
                               SizedBox(width: ScreenUtil().setWidth(8)),
-                              // Button to delete add-on
+                          
                               if (isEditing) ...[
                                 IconButton(
                                   icon: const Icon(Icons.delete),
@@ -469,7 +470,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                               ],
                             ],
                           ),
-                        // Button to add a new add-on
+                       
                         if (isEditing) ...[
                           ElevatedButton(
                             onPressed: () {

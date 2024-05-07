@@ -30,9 +30,9 @@ class _AddFoodScreenState extends State<AddFoodScreen>
   final FoodImagePickerController controller =
       Get.put(FoodImagePickerController());
 
-  // List of food categories including "None" as default
+
   final List<String> _foodCategories = [
-    'None', // Default value
+    'None', 
     'Italian',
     'Mexican',
     'Japanese',
@@ -40,7 +40,7 @@ class _AddFoodScreenState extends State<AddFoodScreen>
     'Indian',
     'American',
     'Thai',
-    // Add more categories as needed
+    
   ];
   bool isOpened = false;
 
@@ -68,6 +68,7 @@ class _AddFoodScreenState extends State<AddFoodScreen>
   var name = TextEditingController();
   var price = TextEditingController();
   var about = TextEditingController();
+  String foodId = "";
   final AddonController addonController = Get.put(AddonController());
 
   UserController userController = Get.put(UserController());
@@ -315,6 +316,17 @@ class _AddFoodScreenState extends State<AddFoodScreen>
                           onChanged: (String? newValue) {
                             setState(() {
                               _selectedCategory = newValue;
+                              controller
+                                  .getCount(_selectedCategory!)
+                                  .then((value) {
+                                int number = controller.count.value + 1;
+                                String seller = getFirstThreeUpperCase(
+                                    userController.user.value!.businessName!);
+                                String result =
+                                    getFirstThreeUpperCase(_selectedCategory!);
+                                foodId =
+                                    "$seller-$result-00${number.toStringAsFixed(0)}";
+                              });
                             });
                           },
                           items: _foodCategories
@@ -479,8 +491,8 @@ class _AddFoodScreenState extends State<AddFoodScreen>
                                             vendorId:
                                                 userController.user.value!.uid!,
                                             data: {
-                                            
                                               "approved": false,
+                                              "foodId": foodId,
                                               "seller": userController
                                                   .user.value!.businessName!,
                                               "foodName": name.text.trim(),
@@ -687,6 +699,14 @@ class _AddFoodScreenState extends State<AddFoodScreen>
         );
       },
     );
+  }
+
+  String getFirstThreeUpperCase(String? input) {
+    if (input!.length < 3) {
+      return input.toUpperCase();
+    } else {
+      return input.substring(0, 3).toUpperCase();
+    }
   }
 
   @override
