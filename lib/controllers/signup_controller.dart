@@ -1,21 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-
 import 'package:get/get.dart';
-import 'package:overlay_loading_progress/overlay_loading_progress.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 import '../pages/shop_registration_screen.dart';
 
 class SignUpController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  var isLoading = false.obs; // Observable for tracking loading state
+
   Future<void> signUpWithEmailAndPassword(
       String name, String email, String password, BuildContext context) async {
     try {
-      OverlayLoadingProgress.start(
-        context,
-        gifOrImagePath: 'images/log.gif',
+      // Set loading state to true
+      context.loaderOverlay.show(
+        progress: 'Doing progress #0',
       );
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
@@ -36,58 +37,61 @@ class SignUpController extends GetxController {
       // Replace with your own logic
 
       Get.offAll(() => const RegistrationScreen());
+      if (!context.mounted) return;
+      Get.back();
     } on FirebaseAuthException catch (e) {
+      context.loaderOverlay.hide();
       if (e.code == 'email-already-in-use') {
         Get.snackbar(
-          "Error", 'The account already exists for that email.',
-          backgroundColor: Colors.red, // Customize the background color
-          colorText: Colors.white, // Customize the text color
-          snackPosition: SnackPosition.TOP, // Position the snackbar at the top
-          borderRadius: 10, // Customize the border radius
-          isDismissible: true, // Allow dismissing the snackbar on tap
-          dismissDirection:
-              DismissDirection.horizontal, // Dismiss in horizontal direction
+          "Error",
+          'The account already exists for that email.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+          borderRadius: 10,
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
           duration: const Duration(seconds: 3),
         );
       } else if (e.code == 'weak-password') {
         Get.snackbar(
-          "Error", 'The password provided is too weak.',
-          backgroundColor: Colors.red, // Customize the background color
-          colorText: Colors.white, // Customize the text color
-          snackPosition: SnackPosition.TOP, // Position the snackbar at the top
-          borderRadius: 10, // Customize the border radius
-          isDismissible: true, // Allow dismissing the snackbar on tap
-          dismissDirection:
-              DismissDirection.horizontal, // Dismiss in horizontal direction
+          "Error",
+          'The password provided is too weak.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+          borderRadius: 10,
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
           duration: const Duration(seconds: 3),
         );
       } else if (e.code == 'operation-not-allowed') {
         Get.snackbar(
-          "Error", 'Enable email/password accounts in the Firebase Console.',
-          backgroundColor: Colors.red, // Customize the background color
-          colorText: Colors.white, // Customize the text color
-          snackPosition: SnackPosition.TOP, // Position the snackbar at the top
-          borderRadius: 10, // Customize the border radius
-          isDismissible: true, // Allow dismissing the snackbar on tap
-          dismissDirection:
-              DismissDirection.horizontal, // Dismiss in horizontal direction
+          "Error",
+          'Enable email/password accounts in the Firebase Console.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+          borderRadius: 10,
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
           duration: const Duration(seconds: 3),
         );
       } else if (e.code == 'invalid-email') {
         Get.snackbar(
-          "Error", 'Email address is not valid..',
-          backgroundColor: Colors.red, // Customize the background color
-          colorText: Colors.white, // Customize the text color
-          snackPosition: SnackPosition.TOP, // Position the snackbar at the top
-          borderRadius: 10, // Customize the border radius
-          isDismissible: true, // Allow dismissing the snackbar on tap
-          dismissDirection:
-              DismissDirection.horizontal, // Dismiss in horizontal direction
+          "Error",
+          'Email address is not valid..',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.TOP,
+          borderRadius: 10,
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
           duration: const Duration(seconds: 3),
         );
       }
     } finally {
-      OverlayLoadingProgress.stop();
+      context.loaderOverlay.hide(); // Set loading state to false
     }
   }
 }

@@ -21,21 +21,25 @@ class ProductDataController extends GetxController {
       if (doc.exists) {
         var data = doc.data()!;
         product.value = Product(
-          docId: docId,
-          fragile: data['Fragible'],
-          hazardous: data['Hazardousness'],
-          colorAvailable: List<String>.from(data['colorAvailable']),
-          currentHazardValue:
-              double.parse(data['currentHazardValue'].toString()),
-          currentSliderValue:
-              double.parse(data['currentSliderValue'].toString()),
-          productDesc: data['productDesc'],
-          productName: data['productName'],
-          productPrice: double.parse(data["productPrice"].toString()),
-          productUrls: List<String>.from(data['productUrls']),
-          selectedCategory: data['selectedCategory'],
-          seller: data['seller'],
-        );
+            docId: docId,
+            fragile: data['Fragible'],
+            hazardous: data['Hazardousness'],
+            colorAvailable: List<String>.from(data['colorAvailable']),
+            currentHazardValue:
+                double.parse(data['currentHazardValue'].toString()),
+            currentSliderValue:
+                double.parse(data['currentSliderValue'].toString()),
+            productDesc: data['productDesc'],
+            productName: data['productName'],
+            productPrice: double.parse(data["productPrice"].toString()),
+            productUrls: List<String>.from(data['productUrls']),
+            selectedCategory: data['selectedCategory'],
+            seller: data['seller'],
+            brand: data['brand'],
+            stockLevels: data['stockLevels'],
+            processTime: data["processTime"],
+            processTimeUnit: data["processTimeUnit"],
+            sizes: data['sizes']);
       } else {
         product.value = null;
       }
@@ -65,21 +69,26 @@ class ProductDataController extends GetxController {
           }
           if (docId == product.value?.docId) {
             product.value = Product(
-              docId: docId,
-              fragile: data?['Fragible'] ?? false,
-              hazardous: data?['Hazardousness'] ?? false,
-              colorAvailable: List<String>.from(data?['colorAvailable'] ?? []),
-              currentHazardValue:
-                  double.parse(data!['currentHazardValue'].toString()),
-              currentSliderValue:
-                  double.parse(data['currentSliderValue'].toString()),
-              productDesc: data['productDesc'] ?? '',
-              productName: data['productName'] ?? '',
-              productPrice: data['productPrice'],
-              productUrls: List<String>.from(data['productUrls'] ?? []),
-              selectedCategory: data['selectedCategory'] ?? '',
-              seller: data['seller'] ?? '',
-            );
+                docId: docId,
+                fragile: data?['Fragible'] ?? false,
+                hazardous: data?['Hazardousness'] ?? false,
+                colorAvailable:
+                    List<String>.from(data?['colorAvailable'] ?? []),
+                currentHazardValue:
+                    double.parse(data!['currentHazardValue'].toString()),
+                currentSliderValue:
+                    double.parse(data['currentSliderValue'].toString()),
+                productDesc: data['productDesc'] ?? '',
+                productName: data['productName'] ?? '',
+                productPrice: data['productPrice'],
+                productUrls: List<String>.from(data['productUrls'] ?? []),
+                selectedCategory: data['selectedCategory'] ?? '',
+                seller: data['seller'] ?? '',
+                brand: data['brand'] ?? '',
+                stockLevels: data['stockLevels'] ?? '',
+                processTime: data["processTime"] ?? '',
+                processTimeUnit: data["processTimeUnit"] ?? '',
+                sizes: data['sizes'] ?? '');
           }
         } else if (change.type == DocumentChangeType.removed) {
           // Handle removed document
@@ -119,6 +128,22 @@ class ProductDataController extends GetxController {
           .collection("vendor_products")
           .doc(docId)
           .update({"colorAvailable": modifiedColorList});
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error Updating: $e');
+      }
+    }
+  }
+
+  Future<void> updateSize(
+      {required List<dynamic> modifiedSizeList, required String docId}) async {
+    try {
+      _firestore
+          .collection('products')
+          .doc(auth.currentUser!.uid)
+          .collection("vendor_products")
+          .doc(docId)
+          .update({"sizes": modifiedSizeList});
     } catch (e) {
       if (kDebugMode) {
         print('Error Updating: $e');

@@ -38,9 +38,15 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
   var addOnName = TextEditingController();
   var addOnPrice = TextEditingController();
   String image = "";
-  String selectedFoodCategory = ''; 
+
+  List<String> unitValues = [];
+
+  String selectedFoodCategory = '';
   List<String> foodCategories = ['Local', 'Rice', 'Asian'];
   List<Map<String, dynamic>> addOns = [];
+
+  var preparationTime = TextEditingController();
+  String _selectedUnit = '';
 
   final GlobalKey<SideMenuState> _sideMenuKey = GlobalKey<SideMenuState>();
   final GlobalKey<SideMenuState> _endSideMenuKey = GlobalKey<SideMenuState>();
@@ -71,7 +77,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
         "name": addOnName.text,
         "price": addOnPrice.text,
       });
-  
+
       addOnName.clear();
       addOnPrice.clear();
     });
@@ -124,7 +130,7 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     'price': newPrice,
                   });
                 });
-                Navigator.of(context).pop();
+                Get.back();
               },
               child: const Text('Add'),
             ),
@@ -150,10 +156,11 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
           foodPrice.text = data["foodPrice"] ?? '';
           desc.text = data["desc"] ?? '';
           selectedFoodCategory = data["foodCat"] ?? '';
+          _selectedUnit = data["processTimeUnit"] ?? "";
+          preparationTime.text = data["processTime"] ?? "";
           addOns = List<Map<String, dynamic>>.from(data["addOns"] ?? []);
           image = data["foodUrl"] ?? "";
           if (!foodCategories.contains(selectedFoodCategory)) {
-       
             foodCategories.add(selectedFoodCategory);
           }
         });
@@ -168,9 +175,14 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
   @override
   void initState() {
     fetchDataFromFirebase();
+    unitValues = {
+      'seconds',
+      'minutes',
+      'hours',
+      'days',
+    }.toList();
     super.initState();
   }
-
 
   List<DropdownMenuItem<String>> buildDropdownMenuItems(
       List<String> categories) {
@@ -192,16 +204,16 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
     });
 
     try {
-   
       Map<String, dynamic> updatedData = {
         "foodName": foodName.text,
         "foodPrice": foodPrice.text,
         "desc": desc.text,
         "foodCat": selectedFoodCategory,
         "addOns": addOns,
+        "processTimeUnit": _selectedUnit,
+        "processTime": preparationTime.text
       };
 
-    
       await FirebaseFirestore.instance
           .collection('foods')
           .doc(auth.currentUser!.uid)
@@ -209,7 +221,6 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
           .doc(widget.docId)
           .update(updatedData);
 
-     
       Fluttertoast.showToast(
         msg: "Data updated successfully",
         toastLength: Toast.LENGTH_LONG,
@@ -220,7 +231,6 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
         fontSize: 16.0,
       );
     } catch (e) {
-
       Fluttertoast.showToast(
         msg: "Failed to update data: $e",
         toastLength: Toast.LENGTH_LONG,
@@ -330,15 +340,14 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                 Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: NetworkImage(userController.user.value!
-                          .downloadURL!), 
+                      image:
+                          NetworkImage(userController.user.value!.downloadURL!),
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
                 Container(
-                  color: Colors.white
-                      .withOpacity(0.7), 
+                  color: Colors.white.withOpacity(0.7),
                 ),
               ],
             ),
@@ -395,6 +404,47 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                     enabled: isEditing,
                     decoration: const InputDecoration(labelText: 'Description'),
                   ),
+                  SizedBox(height: 15.0.h),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          enabled: isEditing,
+                          controller: preparationTime,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Preparation Time',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10.0),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value:
+                              _selectedUnit.isNotEmpty ? _selectedUnit : null,
+                          items: unitValues
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: isEditing
+                              ? (value) {
+                                  setState(() {
+                                    _selectedUnit = value as String;
+                                  });
+                                }
+                              : null,
+                          decoration: const InputDecoration(
+                            labelText: 'Units',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   DropdownButtonFormField(
                     value: selectedFoodCategory.isNotEmpty
                         ? selectedFoodCategory
@@ -411,77 +461,78 @@ class _FoodDetailsScreenState extends State<FoodDetailsScreen> {
                       labelText: 'Food Category',
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.symmetric(
-                        vertical: ScreenUtil().setHeight(16)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Add-ons:',
-                          style: TextStyle(
-                            fontSize: ScreenUtil().setSp(16),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      
-                        for (int index = 0; index < addOns.length; index++)
-                          Row(
+                  addOns.isNotEmpty
+                      ? Container(
+                          margin: EdgeInsets.symmetric(
+                              vertical: ScreenUtil().setHeight(16)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                        
-                              Expanded(
-                                child: TextField(
-                                  controller: TextEditingController(
-                                    text: addOns[index]['name']
-                                        .toString(), 
-                                  ),
-                                  onChanged: (value) {
-                                    addOns[index]['name'] = value;
-                                  },
-                                  decoration: const InputDecoration(
-                                      labelText: 'Add-on Name'),
-                                  enabled: isEditing,
+                              Text(
+                                'Add-ons:',
+                                style: TextStyle(
+                                  fontSize: ScreenUtil().setSp(16),
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(width: ScreenUtil().setWidth(8)),
-                              Expanded(
-                                child: TextField(
-                                  controller: TextEditingController(
-                                    text: addOns[index]['price']
-                                        .toString(), 
-                                  ),
-                                  onChanged: (value) {
-                                    addOns[index]['price'] = value;
-                                  },
-                                  decoration: const InputDecoration(
-                                      labelText: 'Add-on Price'),
-                                  enabled: isEditing,
+                              for (int index = 0;
+                                  index < addOns.length;
+                                  index++)
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: TextEditingController(
+                                          text:
+                                              addOns[index]['name'].toString(),
+                                        ),
+                                        onChanged: (value) {
+                                          addOns[index]['name'] = value;
+                                        },
+                                        decoration: const InputDecoration(
+                                            labelText: 'Add-on Name'),
+                                        enabled: isEditing,
+                                      ),
+                                    ),
+                                    SizedBox(width: ScreenUtil().setWidth(8)),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: TextEditingController(
+                                          text:
+                                              addOns[index]['price'].toString(),
+                                        ),
+                                        onChanged: (value) {
+                                          addOns[index]['price'] = value;
+                                        },
+                                        decoration: const InputDecoration(
+                                            labelText: 'Add-on Price'),
+                                        enabled: isEditing,
+                                      ),
+                                    ),
+                                    SizedBox(width: ScreenUtil().setWidth(8)),
+                                    if (isEditing) ...[
+                                      IconButton(
+                                        icon: const Icon(Icons.delete),
+                                        onPressed: () {
+                                          deleteAddOn(index);
+                                        },
+                                      ),
+                                    ],
+                                  ],
                                 ),
-                              ),
-                              SizedBox(width: ScreenUtil().setWidth(8)),
-                          
+                              SizedBox(height: 10.0.h),
                               if (isEditing) ...[
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
+                                ElevatedButton(
                                   onPressed: () {
-                                    deleteAddOn(index);
+                                    showAddOnDialog(context);
                                   },
+                                  child: const Text('Add New Add-on'),
                                 ),
                               ],
                             ],
                           ),
-                       
-                        if (isEditing) ...[
-                          ElevatedButton(
-                            onPressed: () {
-                              showAddOnDialog(context);
-                            },
-                            child: const Text('Add New Add-on'),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+                        )
+                      : Container()
                 ],
               ),
             ),

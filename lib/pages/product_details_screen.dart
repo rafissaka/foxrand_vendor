@@ -33,6 +33,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   String color = "";
   bool isOpened = false;
 
+  List<String> unitValues = [];
+
   bool isEditing = false;
   RxString selectedProductCategory = RxString(''); // Initial value
   List<String> productCategories = [
@@ -49,6 +51,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   var productName = TextEditingController();
   var productPrice = TextEditingController();
+  var brand = TextEditingController();
+  var stock = TextEditingController();
+  var preparationTime = TextEditingController();
+  TextEditingController sizeController = TextEditingController();
+  String _selectedUnit = '';
+  List sizes = [];
   var desc = TextEditingController();
 
   toggleMenu([bool end = false]) {
@@ -81,7 +89,12 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   void initState() {
     productDataController.getProduct(widget.docId);
     productDataController.listenToSubcollection(widget.docId);
-
+    unitValues = {
+      'seconds',
+      'minutes',
+      'hours',
+      'days',
+    }.toList();
     super.initState();
   }
 
@@ -97,7 +110,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         "productPrice": double.parse(productPrice.text),
         "productDesc": desc.text,
         "selectedCategory":
-            isSelectedCat!.isEmpty ? selectedProductCategory : isSelectedCat,
+            isSelectedCat == '' ? selectedProductCategory.value : isSelectedCat,
+        "processTimeUnit": _selectedUnit,
+        "processTime": preparationTime.text,
+        'brand': brand.text,
+        'stockLevels': int.parse(stock.text),
       };
 
       // Update data in Firebase
@@ -196,6 +213,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               Padding(
                 padding: EdgeInsets.only(right: ScreenUtil().setWidth(8)),
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context)
+                          .primaryColor // Set button background color
+                      ),
                   onPressed: () {
                     setState(() {
                       isEditing = !isEditing;
@@ -204,7 +225,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       updateDataToFirebase();
                     }
                   },
-                  child: Text(isEditing ? "Save" : "Edit"),
+                  child: Text(
+                    isEditing ? "Save" : "Edit",
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
               Container(
@@ -255,9 +279,17 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               desc.text = productDataController.product.value!.productDesc;
               selectedProductCategory.value =
                   productDataController.product.value!.selectedCategory;
+              brand.text = productDataController.product.value!.brand;
+              stock.text =
+                  productDataController.product.value!.stockLevels.toString();
+              preparationTime.text =
+                  productDataController.product.value!.processTime;
 
               totalLength =
                   productDataController.product.value!.productUrls.length;
+
+              _selectedUnit =
+                  productDataController.product.value!.processTimeUnit;
 
               if (!productCategories.contains(selectedProductCategory.value)) {
                 // Add the fetched food category if it's not in the list
@@ -285,6 +317,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   vertical: ScreenUtil().setHeight(12),
                 ),
                 child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -341,77 +374,109 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       SizedBox(
                         height: 10.h,
                       ),
-                      const Text('Available Colors:'),
-                      AbsorbPointer(
-                        absorbing: !isEditing,
-                        child: SizedBox(
-                          height: 50.h,
-                          child: Row(
-                            children: [
-                              ListView.builder(
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: productDataController
-                                      .product.value!.colorAvailable.length,
-                                  itemBuilder: (context, index) {
-                                    final color = productDataController
-                                        .product.value!.colorAvailable[index];
-                                    return Container(
-                                      margin: REdgeInsets.symmetric(
-                                          horizontal: 3.w, vertical: 1.h),
-                                      width: width * 0.07.w,
-                                      height: height * 0.02697.h,
-                                      decoration: BoxDecoration(
-                                        color: colorFromString(color),
-                                        shape: BoxShape.circle,
+                      productDataController
+                              .product.value!.colorAvailable.isNotEmpty
+                          ? Column(
+                              children: [
+                                const Text('Available Colors:'),
+                                AbsorbPointer(
+                                  absorbing: !isEditing,
+                                  child: SizedBox(
+                                    height: 50.h,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          ListView.builder(
+                                              shrinkWrap: true,
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount: productDataController
+                                                  .product
+                                                  .value!
+                                                  .colorAvailable
+                                                  .length,
+                                              itemBuilder: (context, index) {
+                                                final color =
+                                                    productDataController
+                                                        .product
+                                                        .value!
+                                                        .colorAvailable[index];
+                                                return Container(
+                                                  margin: REdgeInsets.symmetric(
+                                                      horizontal: 3.w,
+                                                      vertical: 1.h),
+                                                  width: width * 0.07.w,
+                                                  height: height * 0.02697.h,
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                        colorFromString(color),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                );
+                                              }),
+                                          InkWell(
+                                              onTap: () {
+                                                _showColorPickerDialog(context);
+                                              },
+                                              child: Image.asset(
+                                                "images/add9.png",
+                                                height: double.infinity.h,
+                                              )),
+                                          InkWell(
+                                            onTap: () {
+                                              if (productDataController
+                                                  .product
+                                                  .value!
+                                                  .colorAvailable
+                                                  .isNotEmpty) {
+                                                // Remove the last color from the list
+                                                productDataController.product
+                                                    .value!.colorAvailable
+                                                    .removeLast();
+                                                // Update Firebase with the modified list
+                                                productDataController
+                                                    .deleteColor(
+                                                        modifiedColorList:
+                                                            productDataController
+                                                                .product
+                                                                .value!
+                                                                .colorAvailable,
+                                                        docId: widget.docId);
+                                              }
+                                            },
+                                            child: Container(
+                                              height: 30.h,
+                                              decoration: BoxDecoration(
+                                                  color: productDataController
+                                                          .product
+                                                          .value!
+                                                          .colorAvailable
+                                                          .isNotEmpty
+                                                      ? colorFromString(
+                                                          productDataController
+                                                              .product
+                                                              .value!
+                                                              .colorAvailable
+                                                              .last)
+                                                      : Colors.red,
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                      color: Colors.red)),
+                                              child: const Center(
+                                                  child: Icon(
+                                                Icons.remove,
+                                                color: Colors.orange,
+                                              )),
+                                            ),
+                                          )
+                                        ],
                                       ),
-                                    );
-                                  }),
-                              InkWell(
-                                  onTap: () {
-                                    _showColorPickerDialog(context);
-                                  },
-                                  child: Image.asset(
-                                    "images/add9.png",
-                                    height: double.infinity.h,
-                                  )),
-                              InkWell(
-                                onTap: () {
-                                  if (productDataController.product.value!
-                                      .colorAvailable.isNotEmpty) {
-                                    // Remove the last color from the list
-                                    productDataController
-                                        .product.value!.colorAvailable
-                                        .removeLast();
-                                    // Update Firebase with the modified list
-                                    productDataController.deleteColor(
-                                        modifiedColorList: productDataController
-                                            .product.value!.colorAvailable,
-                                        docId: widget.docId);
-                                  }
-                                },
-                                child: Container(
-                                  height: 30.h,
-                                  decoration: BoxDecoration(
-                                      color: productDataController.product
-                                              .value!.colorAvailable.isNotEmpty
-                                          ? colorFromString(
-                                              productDataController.product
-                                                  .value!.colorAvailable.last)
-                                          : Colors.red,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.red)),
-                                  child: const Center(
-                                      child: Icon(
-                                    Icons.remove,
-                                    color: Colors.orange,
-                                  )),
+                                    ),
+                                  ),
                                 ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
+                              ],
+                            )
+                          : Container(),
                       TextField(
                         controller: productName,
                         enabled: isEditing,
@@ -429,6 +494,60 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         enabled: isEditing,
                         decoration:
                             const InputDecoration(labelText: 'Description'),
+                      ),
+                      TextField(
+                        controller: brand,
+                        enabled: isEditing,
+                        decoration: const InputDecoration(labelText: 'Brand'),
+                      ),
+                      TextField(
+                        controller: stock,
+                        enabled: isEditing,
+                        decoration: const InputDecoration(labelText: 'Brand'),
+                      ),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            flex: 2,
+                            child: TextField(
+                              enabled: isEditing,
+                              controller: preparationTime,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Preparation Time',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10.0),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedUnit.isNotEmpty
+                                  ? _selectedUnit
+                                  : null,
+                              items: unitValues.map<DropdownMenuItem<String>>(
+                                  (String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: isEditing
+                                  ? (value) {
+                                      setState(() {
+                                        _selectedUnit = value as String;
+                                      });
+                                    }
+                                  : null,
+                              decoration: const InputDecoration(
+                                labelText: 'Units',
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       DropdownButtonFormField(
                         value: selectedProductCategory.isNotEmpty
@@ -519,6 +638,121 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             ),
                         ],
                       ),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      productDataController.product.value!.sizes.isNotEmpty
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Available Sizes:'),
+                                SizedBox(
+                                  height: 5.h,
+                                ),
+                                AbsorbPointer(
+                                  absorbing: !isEditing,
+                                  child: Container(
+                                    margin: REdgeInsets.fromLTRB(0, 0, 0, 20.h),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            enabled: isEditing,
+                                            controller: sizeController,
+                                            decoration: const InputDecoration(
+                                                labelText: 'New Size'),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            String newSize =
+                                                sizeController.text.trim();
+                                            if (newSize.isNotEmpty) {
+                                              setState(() {
+                                                productDataController
+                                                    .product.value!.sizes
+                                                    .add(newSize);
+                                                sizeController.clear();
+
+                                                productDataController.updateSize(
+                                                    modifiedSizeList:
+                                                        productDataController
+                                                            .product
+                                                            .value!
+                                                            .sizes,
+                                                    docId: widget.docId);
+                                              });
+                                            }
+                                          },
+                                          child: const Text('Save'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5.h,
+                                ),
+                                AbsorbPointer(
+                                  absorbing: !isEditing,
+                                  child: SizedBox(
+                                    height: 60.h,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: productDataController
+                                          .product.value!.sizes.length,
+                                      itemBuilder: (context, index) {
+                                        final size = productDataController
+                                            .product.value!.sizes[index];
+                                        return InkWell(
+                                          onLongPress: () {
+                                            setState(() {
+                                              productDataController
+                                                  .product.value!.sizes
+                                                  .removeAt(index);
+                                            });
+                                          },
+                                          child: Container(
+                                            margin: REdgeInsets.symmetric(
+                                              horizontal: 3.w,
+                                              vertical: 1.h,
+                                            ),
+                                            child: Container(
+                                              margin: const EdgeInsets.all(2),
+                                              padding: const EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: Colors.amberAccent,
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                              ),
+                                              child: Center(
+                                                  child: Text(
+                                                size,
+                                              )),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 5.h, horizontal: 5.w),
+                                  child: const Text(
+                                    "*Long press on size to delete*",
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                )
+                              ],
+                            )
+                          : Container()
                     ],
                   ),
                 ),
@@ -549,14 +783,19 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             TextButton(
               child: const Text('OK'),
               onPressed: () {
-                // Add the selected color to Firebase
-                String colorString =
-                    colorToString(selectedColor); // Convert color to string
-                productDataController.product.value!.colorAvailable
-                    .add(colorString); // Add color to the list
-                productDataController.updateColors(
+                // Convert color to string
+                String colorString = colorToString(selectedColor);
+                // Check if color already exists in the list
+                if (!productDataController.product.value!.colorAvailable
+                    .contains(colorString)) {
+                  // Add the selected color to Firebase
+                  productDataController.product.value!.colorAvailable
+                      .add(colorString);
+                  productDataController.updateColors(
                     color: productDataController.product.value!.colorAvailable,
-                    docId: widget.docId);
+                    docId: widget.docId,
+                  );
+                }
                 Get.back();
               },
             ),

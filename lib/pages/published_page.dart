@@ -300,7 +300,7 @@ class _PublishedPageState extends State<PublishedPage> {
                     .collection('foods')
                     .doc(auth.currentUser!.uid)
                     .collection('vendor_foods')
-                    .doc(docId) 
+                    .doc(docId)
                     .update({'approved': false});
 
                 // Update the state using GetX

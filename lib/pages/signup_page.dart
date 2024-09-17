@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:vendor/controllers/internet_controller.dart';
 import 'package:vendor/pages/login_page.dart';
 
-
 import '../controllers/signup_controller.dart';
 import '../widgets/custom_textfield.dart';
 import 'phone_register_screen.dart';

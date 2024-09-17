@@ -22,9 +22,14 @@ class ProductUploadController extends GetxController {
       required String productName,
       required double productPrice,
       required String productId,
-      required List<String> colorAvailable,
+      List<String>? colorAvailable,
       required String productDesc,
       required bool isSelectedFr,
+      required String brand,
+      required int stockLevel,
+      List? sizes,
+      required String? processTime,
+      required String processTimeUnit, 
       required bool isSelected,
       required String? selectedCategory,
       required double currentSliderValue,
@@ -53,6 +58,11 @@ class ProductUploadController extends GetxController {
           'currentSliderValue': currentSliderValue,
           'currentHazardValue': currentHazardValue,
           'productUrls': downloadUrls,
+          'brand':brand,
+          'stockLevels':stockLevel,
+          'sizes':sizes,
+          'processTime':processTime,
+          'processTimeUnit':processTimeUnit,
           "seller": businessName,
           "approved": false
         }).then((value) {
@@ -80,7 +90,6 @@ class ProductUploadController extends GetxController {
         XFile imageFile = imageFiles[i];
         String imageName = path.basename(imageFile.path);
 
-        
         File file = File(imageFile.path);
 
         firebase_storage.Reference ref = firebase_storage

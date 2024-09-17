@@ -12,7 +12,7 @@ import '../pages/chat_bot_screen.dart';
 import '../pages/dasbboard_page.dart';
 import '../pages/discount_screen.dart';
 import '../pages/help_page.dart';
-import '../pages/order_history_screen.dart';
+import '../pages/orders_screen.dart';
 import '../pages/profile_screen.dart';
 
 class Nav extends StatefulWidget {
@@ -135,12 +135,12 @@ class _NavState extends State<Nav> {
               ),
               ListTile(
                 onTap: () {
-                  Get.offAll(() => const OrderHistoryPage());
+                  Get.offAll(() => const OrdersPage());
                 },
                 leading:
                     const Icon(Icons.list, size: 20.0, color: Colors.black),
                 title: Text(
-                  "My Orders History",
+                  "My Orders",
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w400,

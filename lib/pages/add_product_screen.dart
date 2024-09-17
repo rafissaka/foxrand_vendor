@@ -31,6 +31,8 @@ class AddProductScreen extends StatefulWidget {
 class _AddProductScreenState extends State<AddProductScreen> {
   UserController userController = Get.put(UserController());
 
+  bool _isChecked = false;
+
   final ProductImagePickerController _productImagePickerController =
       Get.put(ProductImagePickerController());
 
@@ -42,6 +44,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
   var name = TextEditingController();
   var price = TextEditingController();
   var about = TextEditingController();
+  var brand = TextEditingController();
+  var stock = TextEditingController();
+  TextEditingController sizeController = TextEditingController();
+  List<String> savedSizes = [];
   int indexFra = -1;
   int indexHa = -1;
 
@@ -60,6 +66,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   ];
   String productId = "";
   bool isOpened = false;
+
+  String _selectedUnit = '';
+  final TextEditingController _textEditingController = TextEditingController();
 
   final GlobalKey<SideMenuState> _sideMenuKey = GlobalKey<SideMenuState>();
   final GlobalKey<SideMenuState> _endSideMenuKey = GlobalKey<SideMenuState>();
@@ -111,7 +120,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(_productImagePickerController.pickedImages.length);
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
@@ -273,49 +281,57 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                 ),
                                               ),
                                       ),
-                                      Positioned(
-                                        left: 0,
-                                        top: height * 0.1,
-                                        child: SizedBox(
-                                          width: width * 0.9,
-                                          height: height * 0.05,
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              SizedBox(
-                                                width: 29.61.w,
-                                                height: 28.34.h,
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    _productImagePickerController
-                                                        .previousImage();
-                                                  },
-                                                  child: Image.asset(
-                                                    'images/arrowl.png',
-                                                    width: 29.61.w,
-                                                    height: 28.34.h,
+                                      Visibility(
+                                        visible: _productImagePickerController
+                                                    .pickedImages.length >
+                                                1
+                                            ? true
+                                            : false,
+                                        child: Positioned(
+                                          left: 0,
+                                          top: height * 0.1,
+                                          child: SizedBox(
+                                            width: width * 0.9,
+                                            height: height * 0.05,
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                SizedBox(
+                                                  width: 29.61.w,
+                                                  height: 28.34.h,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      _productImagePickerController
+                                                          .previousImage();
+                                                    },
+                                                    child: Image.asset(
+                                                      'images/arrowl.png',
+                                                      width: 29.61.w,
+                                                      height: 28.34.h,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              SizedBox(
-                                                width: 29.61.w,
-                                                height: 28.34.h,
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    _productImagePickerController
-                                                        .nextImage();
-                                                  },
-                                                  child: Image.asset(
-                                                    'images/arrowR.png',
-                                                    width: 29.61.w,
-                                                    height: 28.34.h,
+                                                SizedBox(
+                                                  width: 29.61.w,
+                                                  height: 28.34.h,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      _productImagePickerController
+                                                          .nextImage();
+                                                    },
+                                                    child: Image.asset(
+                                                      'images/arrowR.png',
+                                                      width: 29.61.w,
+                                                      height: 28.34.h,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -422,14 +438,188 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   const InputDecoration(label: Text("Price")),
                             ),
                           ),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 1,
+                                child: Container(
+                                  margin: REdgeInsets.fromLTRB(0, 0, 0, 18.h),
+                                  child: TextFormField(
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return 'Please enter brand';
+                                      }
+
+                                      return null;
+                                    },
+                                    keyboardType: TextInputType.name,
+                                    controller: brand,
+                                    decoration: const InputDecoration(
+                                        label: Text("Brand")),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10.w,
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Container(
+                                  margin: REdgeInsets.fromLTRB(0, 0, 0, 18.h),
+                                  child: TextFormField(
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return 'Please enter Stock levels';
+                                      }
+
+                                      return null;
+                                    },
+                                    keyboardType: TextInputType.number,
+                                    controller: stock,
+                                    decoration: const InputDecoration(
+                                        label: Text("Stock levels")),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                           Container(
-                            margin: REdgeInsets.fromLTRB(0, 6.h, 200.w, 0),
+                            margin: REdgeInsets.fromLTRB(0, 0, 0, 20.h),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: sizeController,
+                                    decoration: const InputDecoration(
+                                        labelText: 'Size'),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    String newSize = sizeController.text.trim();
+                                    if (newSize.isNotEmpty) {
+                                      setState(() {
+                                        savedSizes.add(newSize);
+                                        sizeController.clear();
+                                      });
+                                    }
+                                  },
+                                  child: const Text('Save'),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Visibility(
+                            visible: savedSizes.isNotEmpty ? true : false,
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 60.h,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: savedSizes.length,
+                                    itemBuilder: (context, index) {
+                                      return InkWell(
+                                        onLongPress: () {
+                                          setState(() {
+                                            savedSizes.removeAt(index);
+                                          });
+                                        },
+                                        child: Container(
+                                            margin: const EdgeInsets.all(2),
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                                color: Colors.amberAccent,
+                                                borderRadius:
+                                                    BorderRadius.circular(5)),
+                                            child: Center(
+                                                child: Text(
+                                              savedSizes[index],
+                                              style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w600),
+                                            ))),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const Text(
+                                  "*Long press on size to delete*",
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.w600),
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10.h,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller: _textEditingController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Process Time',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter preparation time';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: DropdownButtonFormField<String>(
+                                  value: _selectedUnit,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _selectedUnit = newValue!;
+                                    });
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please select a unit';
+                                    }
+                                    return null;
+                                  },
+                                  items: [
+                                    // Add "Select unit" as the first item in the dropdown list
+                                    const DropdownMenuItem<String>(
+                                      value: '',
+                                      child: Text('Select unit'),
+                                    ),
+                                    // Add other units
+                                    for (String unit in [
+                                      'seconds',
+                                      'minutes',
+                                      'hours',
+                                      'days',
+                                    ])
+                                      DropdownMenuItem<String>(
+                                        value: unit,
+                                        child: Text(unit),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            margin: REdgeInsets.fromLTRB(0, 20.h, 200.w, 0),
                             child: Text(
                               'Available Colors',
                               style: GoogleFonts.poppins(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w500,
-                                height: 1.2575.h,
                                 color: const Color(0xff000000),
                               ),
                             ),
@@ -765,56 +955,77 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    if (_productImagePickerController
-                                        .pickedImages.isNotEmpty) {
-                                      if (selectedCategory != null &&
-                                          selectedCategory != "None") {
-                                        if (indexFra != -1) {
-                                          if (indexHa != -1) {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              _productUploadController
-                                                  .uploadData(
-                                                      selectedCategory:
-                                                          selectedCategory,
-                                                      businessName:
-                                                          userController
-                                                              .user
-                                                              .value!
-                                                              .businessName!,
-                                                      productName:
-                                                          name.text.trim(),
-                                                      productPrice: double.parse(
-                                                          price.text.trim()),
-                                                      colorAvailable:
-                                                          colorStrings,
-                                                      productDesc:
-                                                          about.text.trim(),
-                                                      isSelectedFr:
-                                                          indexFra == 0
-                                                              ? true
-                                                              : false,
-                                                      isSelected: indexHa == 0
-                                                          ? true
-                                                          : false,
-                                                      currentSliderValue:
-                                                          _currentSliderValue,
-                                                      currentHazardValue:
-                                                          _currenthazardValue,
-                                                      images:
-                                                          _productImagePickerController
-                                                              .pickedImages,
-                                                      context: context,
-                                                      productId: productId)
-                                                  .then((value) {
-                                                clearAll();
-                                                Get.back();
-                                              });
+                                    if (_isChecked) {
+                                      if (_productImagePickerController
+                                          .pickedImages.isNotEmpty) {
+                                        if (selectedCategory != null &&
+                                            selectedCategory != "None") {
+                                          if (indexFra != -1) {
+                                            if (indexHa != -1) {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                _productUploadController
+                                                    .uploadData(
+                                                        brand: brand.text,
+                                                        stockLevel: int.parse(
+                                                            stock.text),
+                                                        processTime:
+                                                            _textEditingController
+                                                                .text,
+                                                        processTimeUnit:
+                                                            _selectedUnit,
+                                                        sizes: savedSizes,
+                                                        selectedCategory:
+                                                            selectedCategory,
+                                                        businessName:
+                                                            userController
+                                                                .user
+                                                                .value!
+                                                                .businessName!,
+                                                        productName:
+                                                            name.text.trim(),
+                                                        productPrice: double.parse(
+                                                            price.text.trim()),
+                                                        colorAvailable:
+                                                            colorStrings,
+                                                        productDesc:
+                                                            about.text.trim(),
+                                                        isSelectedFr: indexFra ==
+                                                                0
+                                                            ? true
+                                                            : false,
+                                                        isSelected: indexHa == 0
+                                                            ? true
+                                                            : false,
+                                                        currentSliderValue:
+                                                            _currentSliderValue,
+                                                        currentHazardValue:
+                                                            _currenthazardValue,
+                                                        images:
+                                                            _productImagePickerController
+                                                                .pickedImages,
+                                                        context: context,
+                                                        productId: productId)
+                                                    .then((value) {
+                                                  clearAll();
+                                                  Get.back();
+                                                });
+                                              }
+                                            } else {
+                                              Fluttertoast.showToast(
+                                                msg:
+                                                    "Please state if product is hazardous",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0,
+                                              );
                                             }
                                           } else {
                                             Fluttertoast.showToast(
                                               msg:
-                                                  "Please state if product is hazardous",
+                                                  "Please state if product is fragible",
                                               toastLength: Toast.LENGTH_SHORT,
                                               gravity: ToastGravity.BOTTOM,
                                               backgroundColor: Colors.red,
@@ -825,7 +1036,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         } else {
                                           Fluttertoast.showToast(
                                             msg:
-                                                "Please state if product is fragible",
+                                                "Please select product category",
                                             toastLength: Toast.LENGTH_SHORT,
                                             gravity: ToastGravity.BOTTOM,
                                             backgroundColor: Colors.red,
@@ -835,7 +1046,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         }
                                       } else {
                                         Fluttertoast.showToast(
-                                          msg: "Please select product category",
+                                          msg:
+                                              "Please select product image or images",
                                           toastLength: Toast.LENGTH_SHORT,
                                           gravity: ToastGravity.BOTTOM,
                                           backgroundColor: Colors.red,
@@ -846,7 +1058,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     } else {
                                       Fluttertoast.showToast(
                                         msg:
-                                            "Please select product image or images",
+                                            "Please agree to the terms and conditions",
                                         toastLength: Toast.LENGTH_SHORT,
                                         gravity: ToastGravity.BOTTOM,
                                         backgroundColor: Colors.red,
@@ -872,25 +1084,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             ],
                           ),
                           Container(
-                            margin: REdgeInsets.fromLTRB(10.w, 10.h, 12.w, 0),
-                            width: double.infinity.spMax,
+                            margin: EdgeInsets.fromLTRB(10.w, 10.h, 12.w, 0),
+                            width: double.infinity,
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  margin: REdgeInsets.fromLTRB(0, 3, 13, 0),
-                                  width: width * 0.05,
-                                  height: height * 0.07,
-                                  child: Image.asset(
-                                    'images/mark.png',
-                                    width: width * 0.05,
-                                    height: height * 0.07,
-                                  ),
+                                Checkbox(
+                                  value: _isChecked,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isChecked = value!;
+                                    });
+                                  },
                                 ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: 305.r,
-                                  ),
+                                Flexible(
                                   child: RichText(
                                     text: TextSpan(
                                       style: GoogleFonts.inter(

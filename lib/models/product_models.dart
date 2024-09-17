@@ -11,6 +11,11 @@ class Product {
   final List<String> productUrls;
   final String selectedCategory;
   final String seller;
+  final List<dynamic> sizes;
+  final int stockLevels;
+  final String processTime;
+  final String processTimeUnit;
+  final String brand;
 
   Product({
     required this.docId,
@@ -25,5 +30,10 @@ class Product {
     required this.productUrls,
     required this.selectedCategory,
     required this.seller,
+    required this.sizes,
+    required this.stockLevels,
+    required this.processTime,
+    required this.processTimeUnit,
+    required this.brand,
   });
 }

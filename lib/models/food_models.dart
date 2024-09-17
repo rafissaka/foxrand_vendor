@@ -1,7 +1,3 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-
-//Restaurant
 class Foods {
   Foods(
       {this.approved,
@@ -45,18 +41,3 @@ class Foods {
     };
   }
 }
-
-// final FirebaseAuth _auth = FirebaseAuth.instance;
-
-// foodQuery(approved) {
-//   return FirebaseFirestore.instance
-//       .collection('foods')
-//       .doc(_auth.currentUser!.uid)
-//       .collection("vendor_foods")
-//       .where("approved", isEqualTo: approved)
-//       .orderBy('foodName')
-//       .withConverter<Foods>(
-//         fromFirestore: (snapshot, _) => Foods.fromJson(snapshot.data()!),
-//         toFirestore: (user, _) => user.toJson(),
-//       );
-// }

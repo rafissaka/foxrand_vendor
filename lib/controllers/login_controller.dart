@@ -3,17 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:overlay_loading_progress/overlay_loading_progress.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 import '../pages/shop_registration_screen.dart';
 
 class LoginController extends GetxController {
+  var isLoading = false.obs;
   Future<void> signIn(
       String email, String password, BuildContext context) async {
     try {
-      OverlayLoadingProgress.start(
-        context,
-        gifOrImagePath: 'images/log.gif',
+      context.loaderOverlay.show(
+        progress: 'Doing progress #0',
       );
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
@@ -26,6 +26,7 @@ class LoginController extends GetxController {
         print('Signed in: ${userCredential.user!.displayName}');
       }
     } on FirebaseAuthException catch (e) {
+      context.loaderOverlay.hide();
       if (e.code == 'auth/user-not-found') {
         Get.snackbar(
           "User not found", "Please register an account",
@@ -64,7 +65,7 @@ class LoginController extends GetxController {
         );
       }
     } finally {
-      OverlayLoadingProgress.stop();
+      context.loaderOverlay.hide();
     }
   }
 }

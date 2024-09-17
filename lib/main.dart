@@ -45,9 +45,9 @@ class MyApp extends StatelessWidget {
       overlayColor: Colors.grey.withOpacity(0.8),
       useDefaultLoading: false,
       overlayWidgetBuilder: (_) {
-        return const Center(
-          child: SpinKitCubeGrid(
-            color: Colors.red,
+        return Center(
+          child: SpinKitFadingCircle(
+            color: Theme.of(context).primaryColor,
             size: 50.0,
           ),
         );

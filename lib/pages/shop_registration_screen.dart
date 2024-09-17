@@ -189,9 +189,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     SizedBox(
                                       width: 10.w,
                                     ),
-                                    Text(vendorController
-                                            .vendorData!["businessName"] ??
-                                        "Shop Name")
+                                    Text(
+                                      vendorController
+                                              .vendorData!["businessName"] ??
+                                          "Shop Name",
+                                      style: const TextStyle(
+                                          color: Colors.transparent),
+                                    )
                                   ],
                                 ),
                               ),

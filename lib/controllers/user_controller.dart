@@ -50,7 +50,7 @@ class UserController extends GetxController {
             secSecContact: userData['secondContactTwo'] ?? '',
             secondContact: userData['secondContact'] ?? '',
             secondContactName: userData['secondContactName'] ?? '',
-            selectedShopType: userData['selectedShopType'] ?? '',
+            selectedShopType: userData['shopType'] ?? '',
             selectedcourierServices: userData['selectedcourierServices'] ?? '',
             shopAddress: userData['shopAddress'] ?? '',
             specialRequirements: userData['specialRequirements'] ?? '',
