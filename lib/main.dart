@@ -1,0 +1,57 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:vendor/mybindings.dart';
+import 'package:vendor/pages/splash_screen.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+Future main() async {
+  await GetStorage.init();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GlobalLoaderOverlay(
+      overlayColor: Colors.grey.withOpacity(0.8),
+      useDefaultLoading: false,
+      overlayWidgetBuilder: (_) {
+        return const Center(
+          child: SpinKitCubeGrid(
+            color: Colors.red,
+            size: 50.0,
+          ),
+        );
+      },
+      child: ScreenUtilInit(
+        designSize: const Size(414, 896),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (_, child) {
+          return GetMaterialApp(
+            debugShowCheckedModeBanner: false,
+            initialBinding: MyBinding(),
+            theme: ThemeData(
+              visualDensity: VisualDensity.adaptivePlatformDensity,
+              primarySwatch: Colors.blue,
+              textTheme: GoogleFonts.poppinsTextTheme(
+                Theme.of(context).textTheme,
+              ),
+            ),
+            home: child,
+          );
+        },
+        child: const SplashScreen(),
+      ),
+    );
+  }
+}

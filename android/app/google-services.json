@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "261762834303",
+    "project_id": "foxrand-c8089",
+    "storage_bucket": "foxrand-c8089.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:261762834303:android:0a81152bb4d25b1da7c44a",
+        "android_client_info": {
+          "package_name": "com.example.vendor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "261762834303-cmq947ofmqc8nqa7ag8qf6h2pam8v30m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.vendor",
+            "certificate_hash": "6a1070ef16bf4e15a0f2c9d5da7a17a34d975116"
+          }
+        },
+        {
+          "client_id": "261762834303-ci1egr4t70r4vvp3aiqgmhucbdh19leg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUpXEvTtDyF0PzyWTGLdBpAK86h7aHJfU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "261762834303-ci1egr4t70r4vvp3aiqgmhucbdh19leg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
